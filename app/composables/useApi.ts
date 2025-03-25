@@ -20,7 +20,7 @@ export const useApi = () => {
             // Wait until auth is resolved
             // const { isAuthResolved } = useAuth()
 
-            const isAuthCheck = request.toString().includes('/account')
+            const isAuthCheck = request.toString().includes('/auth/refresh')
 
             if (!isAuthResolved.value ) {
                 if (!isAuthCheck) {
@@ -30,10 +30,6 @@ export const useApi = () => {
             } else {
                 console.log("useApi", isAuthResolved.value, lastAuthCheck.value, request.toString())
             }
-
-
-
-
 
             if (token.value) {
                 options.headers = {
@@ -46,6 +42,7 @@ export const useApi = () => {
             const accessToken = response._data?.access_token
             const refreshToken = response._data?.refresh_token
 
+            // todo check if here or in store
             // if (accessToken) {
             //     useCookie('auth_token').value = accessToken
             // }
@@ -55,20 +52,12 @@ export const useApi = () => {
             // }
         },
         onResponseError({ response }) {
-            // if (response.status === 401) {
-            //     console.warn('Unauthorized')
-            //     const router = useRouter()
-            //     useCookie('auth_token').value = null
-            //     useCookie('refresh_token').value = null
-            //     router.push('/login')
-            // }
-
             if (response.status === 401) {
                 const route = useRoute()
                 console.warn('Unauthorized', route)
                 if (route.meta.requiresAuth) {
-                    // useCookie('auth_token').value = null
-                    // useCookie('refresh_token').value = null
+                    useCookie('auth_token').value = null
+                    useCookie('refresh_token').value = null
                     return navigateTo('/login')
                 }
 

@@ -10,9 +10,8 @@ useHead({
 onBeforeMount(async () => {
   console.log("app onBeforeMount")
 
-
   const auth = useAuthStore()
-  await auth.fetchUser('auth-init')
+  await auth.checkUser('app')
 })
 
 </script>
