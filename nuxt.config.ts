@@ -14,6 +14,15 @@ export default defineNuxtConfig({
 
   ssr: true,
   devtools: { enabled: true },
+  nitro: {
+    devProxy: {
+      '/dev/': {
+        target: process.env.NUXT_PUBLIC_API_BASE, //'https://api.torotips.com/v1/api',
+        changeOrigin: true,
+        prependPath: true,
+      }
+    }
+  },
 
   runtimeConfig: {
     public: {
@@ -21,23 +30,24 @@ export default defineNuxtConfig({
       APP_NAME: pkg.name,
       // eslint-disable-next-line node/prefer-global/process
       APP_MODE: process.env?.NODE_ENV,
+      apiBase: process.env.NUXT_PUBLIC_API_BASE,
     },
   },
 
   modules: [
+    '@primevue/nuxt-module',
     '@pinia/nuxt',
     '@nuxt/content',
     '@vueuse/nuxt',
     '@nuxt/test-utils/module',
     '@nuxt/image',
     '@nuxt/fonts',
-    '@sfxcode/formkit-primevue-nuxt',
     '@unocss/nuxt',
+    '@nuxtjs/i18n'
   ],
   content: {
     highlight: {
       theme: {
-        // Default theme (same as single string)
         default: 'github-light',
         // Theme used if `html.dark`
         dark: 'github-dark',
@@ -47,24 +57,30 @@ export default defineNuxtConfig({
   },
 
   i18n: {
+    bundle: {
+      optimizeTranslationDirective: false,
+    },
     lazy: true,
-    langDir: 'locales',
-    defaultLocale: 'en',
+    langDir: 'locales', // 'i18n/locales'
+    defaultLocale: 'de',
     strategy: 'no_prefix',
     locales: [
       { code: 'en', file: 'en.json', name: 'English' },
       { code: 'de', file: 'de.json', name: 'German' },
     ],
     vueI18n: '../vue-i18n.options.ts',
-  },
-  formkitPrimevue: {
-    includePrimeIcons: true,
-    includeStyles: true,
-    installFormKit: true,
-    installI18N: true,
+    // detectBrowserLanguage: {
+    //   useCookie: false,
+    //   fallbackLocale: 'de',
+    //   redirectOn: 'root' // or 'all' if needed
+    // }
   },
   primevue: {
-    autoImport: true,
+    components: {
+      include: '*',
+      exclude: ['LazyForm', 'LazyFormField']
+    },
+    autoImport: true,  // todo test
     options: {
       theme: {
         preset: Aura,
@@ -74,10 +90,22 @@ export default defineNuxtConfig({
       },
       ripple: true,
     },
+    // importPT: { from: '@/passthrough/custompt.ts' },
+    // importTheme: { from: '@/themes/anathema.ts' },
   },
-
+  imports: {
+    presets: [
+      {
+        from: 'vue',
+        imports: ['defineAsyncComponent']
+      }
+    ]
+  },
   build: {
-    transpile: ['nuxt', 'primevue', '@sfxcode/formkit-primevue'],
+    transpile: [
+      'nuxt',
+      'primevue',
+    ],
   },
 
   sourcemap: {
